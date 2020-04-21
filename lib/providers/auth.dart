@@ -12,6 +12,7 @@ class Auth with ChangeNotifier {
   String _userId;
   Timer _authTimer;
 
+
   bool get isAuth {
     return token != null;
   }
@@ -59,7 +60,7 @@ class Auth with ChangeNotifier {
   Future<void> _authenticateUser(
       String email, String password, String text) async {
     final url =
-        "https://identitytoolkit.googleapis.com/v1/accounts:$text?key=AIzaSyDQZaot4vcQo7H0xYNJJ9H1pDRMMb_vkMg";
+        "https://identitytoolkit.googleapis.com/v1/accounts:$text?key=$key";
 
     try {
       final response = await http.post(

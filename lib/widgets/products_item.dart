@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shopapp/providers/auth.dart';
 import 'package:shopapp/providers/cart.dart';
 import 'package:shopapp/providers/product.dart';
 import 'package:shopapp/screens/product_details_screen.dart';
@@ -9,6 +10,7 @@ class ProductItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final product = Provider.of<Product>(context, listen: false);
     final cart = Provider.of<Cart>(context, listen: false);
+    final authData = Provider.of<Auth>(context, listen: false);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 5),
       child: ClipRRect(
@@ -39,7 +41,8 @@ class ProductItem extends StatelessWidget {
                     value.isFavourite ? Icons.favorite : Icons.favorite_border),
                 onPressed: () async {
                   try {
-                    await value.toggleFavouriteStatus();
+                    await value.toggleFavouriteStatus(
+                        authData.token, authData.userId);
                   } catch (e) {
                     Scaffold.of(context)
                         .showSnackBar(SnackBar(content: Text("Failed!")));

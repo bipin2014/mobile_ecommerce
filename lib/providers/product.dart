@@ -20,12 +20,13 @@ class Product with ChangeNotifier {
       this.imageUrl,
       this.isFavourite = false});
 
-  Future<void> toggleFavouriteStatus() async {
+  Future<void> toggleFavouriteStatus(String token, String userId) async {
     isFavourite = !isFavourite;
     notifyListeners();
-    final url = "https://korean-meaning.firebaseio.com/products/$id.json";
+    final url =
+        "https://korean-meaning.firebaseio.com/userFavourites/$userId/$id.json?auth=$token";
     var response =
-        await http.patch(url, body: json.encode({'isFavourite': isFavourite}));
+        await http.put(url, body: json.encode(isFavourite));
     if (response.statusCode >= 400) {
       isFavourite = !isFavourite;
       notifyListeners();

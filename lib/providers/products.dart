@@ -40,6 +40,10 @@ class Products with ChangeNotifier {
 //          'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Cast-Iron-Pan.jpg/1024px-Cast-Iron-Pan.jpg',
 //    ),
   ];
+  final String authToken;
+  final String userId;
+
+  Products(this.authToken, this._items, this.userId);
 
   Product findById(String id) {
     return _items.firstWhere((prod) => prod.id == id);
@@ -54,7 +58,8 @@ class Products with ChangeNotifier {
   }
 
   Future<void> addProduct(Product product) async {
-    final String url = 'https://korean-meaning.firebaseio.com/products.json';
+    final String url =
+        'https://korean-meaning.firebaseio.com/products.json?auth=$authToken';
     try {
       final value = await http.post(url,
           body: json.encode({
@@ -62,7 +67,7 @@ class Products with ChangeNotifier {
             'description': product.description,
             'imageUrl': product.imageUrl,
             'price': product.price,
-            'isFavourite': product.isFavourite,
+            'creatorId': userId,
           }));
       final newProduct = Product(
         id: json.decode(value.body)['name'],
@@ -79,16 +84,21 @@ class Products with ChangeNotifier {
     }
   }
 
-  Future<void> fetchdata() async {
-    final url = "https://korean-meaning.firebaseio.com/products.json";
-
+  Future<void> fetchdata([bool filterByUser = false]) async {
+    final filterString =
+        filterByUser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    var url =
+        'https://korean-meaning.firebaseio.com/products.json?auth=$authToken&$filterString';
     try {
       final response = await http.get(url);
       final extractedData = json.decode(response.body) as Map<String, dynamic>;
-//      print(extractedData);
       if (extractedData == null) {
         return;
       }
+      url =
+          "https://korean-meaning.firebaseio.com/userFavourites/$userId.json?auth=$authToken";
+      final favouriteResponse = await http.get(url);
+      final favouriteData = json.decode(favouriteResponse.body);
       final List<Product> list = [];
       extractedData.forEach((key, value) {
         list.add(Product(
@@ -97,7 +107,8 @@ class Products with ChangeNotifier {
           description: value['description'],
           price: value['price'],
           imageUrl: value['imageUrl'],
-          isFavourite: value['isFavourite'],
+          isFavourite:
+              favouriteData == null ? false : favouriteData[key] ?? false,
         ));
       });
       _items = list;
@@ -110,7 +121,8 @@ class Products with ChangeNotifier {
   Future<void> updateProduct(String id, Product newProduct) {
     final prodIndex = _items.indexWhere((prod) => prod.id == id);
     if (prodIndex >= 0) {
-      final url = "https://korean-meaning.firebaseio.com/products/$id.json";
+      final url =
+          "https://korean-meaning.firebaseio.com/products/$id.json?auth=$authToken";
       try {
         http.patch(url,
             body: json.encode({
@@ -134,7 +146,8 @@ class Products with ChangeNotifier {
     var elementData = _items[elementIndex];
     _items.removeAt(elementIndex);
     notifyListeners();
-    final url = "https://korean-meaning.firebaseio.com/products/$id.json";
+    final url =
+        "https://korean-meaning.firebaseio.com/products/$id.json?auth=$authToken";
     final response = await http.delete(url);
     if (response.statusCode >= 400) {
       _items.insert(elementIndex, elementData);

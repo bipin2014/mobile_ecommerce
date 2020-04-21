@@ -10,7 +10,7 @@ import 'package:shopapp/widgets/products_grid.dart';
 enum FiltersOptions { Favourites, All_Item }
 
 class ProductsOverViewScreen extends StatefulWidget {
-  static const url = '/';
+  static const url = '/product-overview';
 
   @override
   _ProductsOverViewScreenState createState() => _ProductsOverViewScreenState();

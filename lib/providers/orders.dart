@@ -19,14 +19,18 @@ class OrderItem {
 }
 
 class Orders with ChangeNotifier {
+  final String token;
+  final String userId;
   List<OrderItem> _orders = [];
+
+  Orders(this.token, this._orders, this.userId);
 
   List<OrderItem> get orders {
     return [..._orders];
   }
 
   Future<void> addOrder(List<CartItem> cartProducts, double total) async {
-    final url = "https://korean-meaning.firebaseio.com/orders.json";
+    final url = "https://korean-meaning.firebaseio.com/orders/$userId.json?auth=$token";
     final timestamp = DateTime.now();
     final response = await http.post(url,
         body: json.encode({
@@ -54,7 +58,7 @@ class Orders with ChangeNotifier {
   }
 
   Future<void> getOrdersData() async {
-    final url = "https://korean-meaning.firebaseio.com/orders.json";
+    final url = "https://korean-meaning.firebaseio.com/orders/$userId.json?auth=$token";
     final response = await http.get(url);
     final List<OrderItem> loadedOrders = [];
 
